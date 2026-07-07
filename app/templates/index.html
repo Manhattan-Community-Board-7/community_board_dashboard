@@ -342,7 +342,7 @@
             <div id="results" class="results">
                 <div id="votingControlsContainer">
                     <button id="stopButton" onclick="stopVoting()" style="display: none;">Stop Voting</button>
-                    <!-- <div id="manualEntryContainer">
+                    <div id="manualEntryContainer">
                         <select id="nameDropdown">
                             <option value="">Select Name</option>
                         </select>
@@ -354,7 +354,7 @@
                             <option value="Cause">Ineligible for Cause</option>
                         </select>
                         <button id="manualEntryButton" onclick="manualEntry()">Manual Entry</button>
-                    </div> -->
+                    </div>
                 </div>
                 <h3 id="voteTitle">Results of Vote</h1>
                 <div class="vote-count">
@@ -583,10 +583,8 @@
                     document.getElementById("votingTitleInput").value = currentVoteName;
                     refreshVotingVisibility(); // This will now use currentVoteData
 
-                    // TODO: Replace this hardcoded names list with a fetch from /members endpoint if needed for nameDropdown
-                    // names = [{'name':'Blanche','number':'+1'},{'name':'Page','number':'+19174056332'},{'name':'Rhonda','number':'+13474765085'},{'name':'George','number':'+13476819729'},{'name':'Peter','number':'+19175438922'}]
-                    // updateNameDropdown(names);
-                    // //updateManualVoteOptions(); // Update vote options based on fetched vote type
+                    fetchAndPopulateNameDropdown();
+                    updateManualVoteOptions(); // Update vote options based on fetched vote type
                 })
                 .catch(error => {
                     console.error("Error checking voting status:", error);
@@ -850,7 +848,7 @@
 
                         // Refresh UI elements based on the new vote type
                         refreshVotingVisibility(); // This should now use the updated currentVoteData
-                        //updateManualVoteOptions(); // Update dropdown for manual entry
+                        updateManualVoteOptions(); // Update dropdown for manual entry
 
                     } else {
                         // Use error message from server response if available
@@ -914,7 +912,7 @@
                 document.getElementById("left-section").style.width = '45%'; // Consider '100%' or adjust as per new layout needs
 
                 // Ensure manual vote options are correct for the current vote type
-                //updateManualVoteOptions();
+                updateManualVoteOptions();
                 fetchResults(); // Explicitly call to refresh results display based on new currentVoteData
 
             } else {
@@ -923,7 +921,7 @@
                 document.getElementById("right-section").style.display = "block";
                 document.getElementById("left-section").style.width = '90%'; // Reset width
                 currentVoteData = { voteType: "RESOLUTION", electionCandidates: [] }; // Reset on stop/initial
-                //updateManualVoteOptions(); // Reset manual vote options to default (Resolution)
+                updateManualVoteOptions(); // Reset manual vote options to default (Resolution)
             }
         }
 
@@ -994,22 +992,46 @@
             }
         }
 
-        // Add event listeners to update the name dropdown (call this function to populate the names)
-        function updateNameDropdown(names) {
-            //populateNameDropdown(names);
+        // Fetch the current members list from the server and populate the name dropdown
+        function fetchAndPopulateNameDropdown() {
+            fetch(server_url + '/members', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': auth_key,
+                    'x-community-board': communityBoard,
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                const membersData = JSON.parse(data.body);
+                const names = Object.entries(membersData).map(([number, member]) => ({
+                    name: member.name,
+                    number: number,
+                }));
+                updateNameDropdown(names);
+            })
+            .catch(error => {
+                console.error("Error fetching members for name dropdown:", error);
+            });
         }
 
-        // // Call this function to populate the name dropdown (modify as needed)
-        // function populateNameDropdown(names) {
-        //     const nameDropdown = document.getElementById("nameDropdown");
-        //     nameDropdown.innerHTML = '<option value="">Select Name</option>';
-        //     names.forEach((name) => {
-        //         const option = document.createElement("option");
-        //         option.value = name['number'];
-        //         option.text = name['name'];
-        //         nameDropdown.appendChild(option);
-        //     });
-        // }
+        // Add event listeners to update the name dropdown (call this function to populate the names)
+        function updateNameDropdown(names) {
+            populateNameDropdown(names);
+        }
+
+        // Call this function to populate the name dropdown (modify as needed)
+        function populateNameDropdown(names) {
+            const nameDropdown = document.getElementById("nameDropdown");
+            nameDropdown.innerHTML = '<option value="">Select Name</option>';
+            names.forEach((name) => {
+                const option = document.createElement("option");
+                option.value = name['number'];
+                option.text = name['name'];
+                nameDropdown.appendChild(option);
+            });
+        }
 
         function exportVotes() {
             const exportModal = document.getElementById('exportModal');
@@ -1155,10 +1177,7 @@
                     alert('Members updated successfully');
                     closeEditMembersModal();
                     // Refresh the name dropdown
-                    // updateNameDropdown(Object.entries(members).map(([number, data]) => ({
-                    //     name: data.name,
-                    //     number: number
-                    // })));
+                    fetchAndPopulateNameDropdown();
                 } else {
                     throw new Error('Failed to update members');
                 }
