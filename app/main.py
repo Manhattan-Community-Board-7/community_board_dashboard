@@ -7,6 +7,7 @@ from VoteClass import Vote
 from VoteOptionsEnum import VoteOptions
 from twilio.twiml.messaging_response import MessagingResponse
 from VoteLoggingClass import LocalVoteLoggingClass, S3VoteLoggingClass
+import shelly_door
 
 INSTRUCTIONS_MESSAGE = ' Welcome to Community Board text message voting. text yes to vote yes, no to vote no, abstain to vote abstain, cause to vote cause. '
 INVALID_INPUT_MESSAGE = 'Your vote was NOT RECORDED, your message was invalid. The only valid inputs are yes, no, abstain, cause with no caps'
@@ -152,6 +153,13 @@ def parse_incoming_text(incoming_number,incoming_msg,community_board):
         return create_response_msg(NOT_VALID_NUMBER_MESSAGE+' '+incoming_number)
 
     voting_member:Voter = members[incoming_number] or None
+
+    if shelly_door.is_door_command(incoming_msg):
+        if shelly_door.trigger_door():
+            return create_response_msg(shelly_door.DOOR_TRIGGERED_MESSAGE)
+        else:
+            return create_response_msg(shelly_door.DOOR_ERROR_MESSAGE)
+
     if not persister.get_currently_in_a_voting_session(community_board):
         return create_response_msg(NOT_VOTING_MESSAGE)
     if check_if_instructions(incoming_msg):
