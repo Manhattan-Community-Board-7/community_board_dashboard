@@ -38,9 +38,10 @@ def trigger_door():
         )
         response_body = response.data.decode('utf-8')
         print(f"Shelly door trigger response: status={response.status} body={response_body}")
-        if response.status != 200:
-            return False
-        return bool(json.loads(response_body).get('isok'))
+        # Shelly's v2 set/switch endpoint returns HTTP 200 with an empty body on
+        # success (confirmed via CloudWatch logs 2026-07-28) rather than a JSON
+        # {"isok": true} payload, so status alone is the success signal.
+        return response.status == 200
     except Exception as e:
         print(f"Error triggering Shelly door relay: {str(e)}")
         return False
