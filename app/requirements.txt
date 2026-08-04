@@ -1,6 +1,7 @@
 twilio
 flask
 flask-cors
+apig-wsgi
 boto3
 pyngrok
 urllib3<2

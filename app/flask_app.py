@@ -44,18 +44,23 @@ def export_votes(provided_community_board):
 
 @app.route('/incomingtext', methods=['POST'])
 def incoming_text():
+    provided_auth_key = request.args.get('auth')
+    twilio_auth_key = os.environ.get('TWILIO_API_KEY')
+    if provided_auth_key != twilio_auth_key:
+        return jsonify({'message': 'Unauthorized'}), 401
+
+    community_board = request.args.get('cb', '')
     incoming_msg = request.values['Body']
     incoming_number = request.values['From']
-    community_board = '7'
     return parse_incoming_text(incoming_number,incoming_msg,community_board)
-    
+
 @app.route('/results', methods=['GET'])
 @require_auth_key
 def results(provided_community_board):
     return api_get_results(provided_community_board)
 
-@app.route('/webresults', methods=['GET'])
-def webresults():
+@app.route('/', methods=['GET'])
+def index():
    return render_template('./index.html')
 
 @app.route('/manualentry', methods=['POST'])
