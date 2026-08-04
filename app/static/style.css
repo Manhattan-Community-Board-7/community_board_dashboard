@@ -305,6 +305,10 @@ li {
 .table thead th {
     position: sticky;
     top: 0;
+    /* Bootstrap paints table cell backgrounds via --bs-table-bg (defaults to
+       transparent), which otherwise shows scrolled rows through the sticky
+       header even though background: white is set below. Pin both. */
+    --bs-table-bg: white;
     background: white;
-    z-index: 1;
+    z-index: 2;
 }
