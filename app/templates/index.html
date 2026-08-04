@@ -757,7 +757,7 @@
                 exportResults.style.display = 'none';
 
                 try {
-                    const response = await fetch('/exportvotes', {
+                    const response = await fetch(server_url + '/exportvotes', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

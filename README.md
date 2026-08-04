@@ -4,7 +4,6 @@
 
 ```bash
 export FLASK_APP=flask_app.py
-export API_KEY=<your-api-key>
 cd app
 flask run --reload
 ```
