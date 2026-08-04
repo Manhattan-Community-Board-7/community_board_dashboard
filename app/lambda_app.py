@@ -27,6 +27,9 @@ def lambda_handler(event, context):
     if path in ('/', '/webresults'):
         return get_html_page()
 
+    if path.startswith('/static/'):
+        return get_static_file(path)
+
     if path == '/incomingtext' and 'auth=' + TWILIO_API_KEY in event['rawQueryString']:
         body = event['body']
         decoded_body = base64.b64decode(body).decode('utf-8')
@@ -93,4 +96,27 @@ def get_html_page():
         'statusCode': 200,
         'headers': {'Content-Type': 'text/html'},
         'body': html_content,
+    }
+
+STATIC_CONTENT_TYPES = {
+    '.css': 'text/css',
+    '.js': 'application/javascript',
+}
+
+def get_static_file(path):
+    # path looks like '/static/style.css'; keep it confined to the static/ dir.
+    relative_path = path[len('/static/'):]
+    static_dir = os.path.join(os.path.dirname(__file__), 'static')
+    file_path = os.path.normpath(os.path.join(static_dir, relative_path))
+    if not file_path.startswith(static_dir + os.sep) or not os.path.isfile(file_path):
+        return json_response('Not found', 404)
+
+    _, ext = os.path.splitext(file_path)
+    content_type = STATIC_CONTENT_TYPES.get(ext, 'application/octet-stream')
+    with open(file_path, 'r') as f:
+        content = f.read()
+    return {
+        'statusCode': 200,
+        'headers': {'Content-Type': content_type},
+        'body': content,
     }
