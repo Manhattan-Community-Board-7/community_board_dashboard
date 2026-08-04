@@ -101,8 +101,13 @@ def get_html_page():
 STATIC_CONTENT_TYPES = {
     '.css': 'text/css',
     '.js': 'application/javascript',
-    '.svg': 'image/svg+xml',
+    '.webp': 'image/webp',
 }
+
+# Extensions that are binary, not text - API Gateway/Lambda need these
+# base64-encoded with isBase64Encoded set, or the bytes get corrupted trying
+# to decode/re-encode them as UTF-8 text.
+BINARY_STATIC_EXTENSIONS = {'.webp'}
 
 def get_static_file(path):
     # path looks like '/static/style.css'; keep it confined to the static/ dir.
@@ -114,6 +119,17 @@ def get_static_file(path):
 
     _, ext = os.path.splitext(file_path)
     content_type = STATIC_CONTENT_TYPES.get(ext, 'application/octet-stream')
+
+    if ext in BINARY_STATIC_EXTENSIONS:
+        with open(file_path, 'rb') as f:
+            content = base64.b64encode(f.read()).decode('ascii')
+        return {
+            'statusCode': 200,
+            'headers': {'Content-Type': content_type},
+            'body': content,
+            'isBase64Encoded': True,
+        }
+
     with open(file_path, 'r') as f:
         content = f.read()
     return {
