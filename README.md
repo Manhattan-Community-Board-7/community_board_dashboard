@@ -17,7 +17,7 @@ Then open http://127.0.0.1:5000/webresults
 
 ### Overview
 
-- **Lambda**: `CBFunction` — Python 3.8, handles all API routes. `deploy_lambda.sh` bundles `app/requirements.txt` dependencies directly into the deploy zip (see below) — no separate Lambda layer.
+- **Lambda**: `CBFunction` — Python 3.12, handles all API routes. `deploy_lambda.sh` bundles `app/requirements.txt` dependencies directly into the deploy zip (see below) — no separate Lambda layer.
 - **API Gateway**: HTTP API (v2), catch-all `$default` route → Lambda, stage named `default`
 - **Custom domain**: `internal.mcb7.org` → API Gateway, certificate managed in ACM
 - **DNS**: Route 53, ALIAS record for `internal.mcb7.org`
