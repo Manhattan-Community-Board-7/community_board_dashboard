@@ -101,6 +101,7 @@ def get_html_page():
 STATIC_CONTENT_TYPES = {
     '.css': 'text/css',
     '.js': 'application/javascript',
+    '.svg': 'image/svg+xml',
 }
 
 def get_static_file(path):
