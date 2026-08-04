@@ -2,6 +2,10 @@
 .vscode/
 door_scripts/.env
 
+# deploy_lambda.sh build artifacts
+/lambda_build/
+/cbpackage.zip
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

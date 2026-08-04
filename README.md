@@ -17,8 +17,7 @@ Then open http://127.0.0.1:5000/webresults
 
 ### Overview
 
-- **Lambda**: `CBFunction` — Python 3.8, handles all API routes
-- **Lambda layer**: `cb-dashboard-dependencies` — third-party packages (twilio, flask, etc.)
+- **Lambda**: `CBFunction` — Python 3.8, handles all API routes. `deploy_lambda.sh` bundles `app/requirements.txt` dependencies directly into the deploy zip (see below) — no separate Lambda layer.
 - **API Gateway**: HTTP API (v2), catch-all `$default` route → Lambda, stage named `default`
 - **Custom domain**: `internal.mcb7.org` → API Gateway, certificate managed in ACM
 - **DNS**: Route 53, ALIAS record for `internal.mcb7.org`
@@ -34,19 +33,17 @@ Then open http://127.0.0.1:5000/webresults
 
 | Script | Purpose |
 |---|---|
-| `./deploy_lambda.sh` | Update Lambda function code (default) |
+| `./deploy_lambda.sh` | Install deps + update Lambda function code (default) — only deploys committed (`git archive`) files, commit first |
 | `./deploy_lambda.sh --new` | Create Lambda function for the first time |
-| `./deploy_layer.sh` | Build and publish the dependency layer, attach it to CBFunction |
 | `./deploy_api_gateway.sh` | Create the HTTP API Gateway (first-time setup) |
 | `./deploy_custom_domain.sh` | Request ACM cert, create custom domain, wire up Route 53 (first-time setup) |
 
 ### First-time setup order
 
 1. `./deploy_lambda.sh --new`
-2. `./deploy_layer.sh`
-3. `./deploy_api_gateway.sh`
-4. `./deploy_custom_domain.sh`
-5. Set environment variables on the Lambda:
+2. `./deploy_api_gateway.sh`
+3. `./deploy_custom_domain.sh`
+4. Set environment variables on the Lambda:
    ```bash
    aws lambda update-function-configuration \
      --profile mcb7 \
