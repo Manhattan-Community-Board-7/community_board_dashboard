@@ -36,6 +36,12 @@ def export_votes(provided_community_board):
 
         result = api_export_votes(date,provided_community_board)
         print(result)
+        if isinstance(result, dict):
+            # api_export_votes' error paths return a Lambda-proxy-shaped
+            # envelope ({statusCode, headers, body}) rather than a real
+            # Flask response - a bare dict return always gets wrapped as
+            # 200 by Flask otherwise, silently hiding the real status.
+            return jsonify(result.get('body')), result.get('statusCode', 500)
         return result
         
     except Exception as e:
