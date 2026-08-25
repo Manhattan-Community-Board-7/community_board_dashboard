@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>MCB7 Door Log</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2em;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        table { border-collapse: collapse; width: 100%; max-width: 500px; }
+        th, td { text-align: left; padding: 6px 12px; border-bottom: 1px solid #ddd; }
+        th { background: #f4f4f4; }
+        #status { color: #888; }
+    </style>
+</head>
+<body>
+    <h1>MCB7 Door Log</h1>
+    <p>Board members to open door via text message in last 30 days.</p>
+    <p id="status">Loading...</p>
+    <table id="doorTable" style="display:none;">
+        <thead>
+            <tr><th>Time</th><th>Name</th></tr>
+        </thead>
+        <tbody id="doorTableBody"></tbody>
+    </table>
+
+    <script>
+        // Auto-detect: hitting the dev server locally talks to the local API,
+        // anything else (prod, or the file opened directly) talks to prod.
+        let server_url = (location.hostname === '127.0.0.1' || location.hostname === 'localhost')
+            ? 'http://127.0.0.1:5000'
+            : 'https://internal.mcb7.org';
+        let auth_key = null
+        let communityBoard = '7'
+
+        window.onload = function () {
+            auth_key = prompt("Enter Password:");
+            fetchDoorLog();
+        };
+
+        // Timestamps come back as 'YYYY_MM_DD_HH:MM:SS' (Eastern time, no
+        // timezone info) -- parse the fields directly instead of handing
+        // this to Date() so it's not reinterpreted as UTC/local.
+        function formatTimestamp(ts) {
+            const [year, month, day, time] = ts.split('_');
+            const [hour, minute] = time.split(':');
+            const date = new Date(year, month - 1, day, hour, minute);
+            const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            return dateStr + ', ' + timeStr;
+        }
+
+        function fetchDoorLog() {
+            fetch(server_url + '/doorlog', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': auth_key,
+                        'x-community-board': communityBoard,
+                    },
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Unauthorized or request failed (status ' + response.status + ')');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const statusEl = document.getElementById('status');
+                    if (data.length === 0) {
+                        statusEl.textContent = 'No door texts in the last 30 days.';
+                        return;
+                    }
+                    const tbody = document.getElementById('doorTableBody');
+                    tbody.innerHTML = '';
+                    // Newest first.
+                    data.slice().reverse().forEach(entry => {
+                        const row = document.createElement('tr');
+                        const timeCell = document.createElement('td');
+                        timeCell.textContent = formatTimestamp(entry.timestamp);
+                        const nameCell = document.createElement('td');
+                        nameCell.textContent = entry.name;
+                        row.appendChild(timeCell);
+                        row.appendChild(nameCell);
+                        tbody.appendChild(row);
+                    });
+                    statusEl.style.display = 'none';
+                    document.getElementById('doorTable').style.display = '';
+                })
+                .catch(error => {
+                    document.getElementById('status').textContent = 'Error loading door log: ' + error.message;
+                });
+        }
+    </script>
+</body>
+</html>

@@ -8,6 +8,7 @@ from VoteOptionsEnum import VoteOptions
 from twilio.twiml.messaging_response import MessagingResponse
 from VoteLoggingClass import LocalVoteLoggingClass, S3VoteLoggingClass
 import shelly_door
+import door_log
 
 INSTRUCTIONS_MESSAGE = ' Welcome to Community Board text message voting. text yes to vote yes, no to vote no, abstain to vote abstain, cause to vote cause. '
 INVALID_INPUT_MESSAGE = 'Your vote was NOT RECORDED, your message was invalid. The only valid inputs are yes, no, abstain, cause with no caps'
@@ -197,6 +198,18 @@ def true_if_members_list_zero(community_board):
     return len(members) == 0
 
 #### API SECTION ###
+
+def api_get_door_log(community_board):
+    entries = door_log.get_door_log(community_board)
+    members = persister.get_members(community_board)
+    result = []
+    for entry in entries:
+        voter = members.get(entry['from'])
+        result.append({
+            'name': voter.name if voter else 'Unknown',
+            'timestamp': entry['timestamp'],
+        })
+    return result
 
 def api_get_results(community_board):
     from enum import Enum

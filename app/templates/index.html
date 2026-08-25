@@ -181,8 +181,11 @@
         let timerInterval
         let lastFetchTime = Date.now();
         let currentVoteName = ''
-        //let server_url = 'http://127.0.0.1:5000'
-        let server_url = 'https://internal.mcb7.org'
+        // Auto-detect: hitting the dev server locally talks to the local API,
+        // anything else (prod, or the file opened directly) talks to prod.
+        let server_url = (location.hostname === '127.0.0.1' || location.hostname === 'localhost')
+            ? 'http://127.0.0.1:5000'
+            : 'https://internal.mcb7.org';
         let auth_key = null
         let communityBoard = '';
         let currentVoteData = { voteType: "RESOLUTION", electionCandidates: [] }; // Global state for vote type and candidates

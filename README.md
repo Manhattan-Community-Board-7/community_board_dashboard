@@ -4,6 +4,8 @@
 
 ```bash
 export FLASK_APP=flask_app.py
+export AWS_PROFILE=mcb7
+export API_KEY=<the_key_we_use_on_the_live_site>
 cd app
 flask run --reload
 ```

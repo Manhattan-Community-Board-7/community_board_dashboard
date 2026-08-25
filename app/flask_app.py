@@ -69,6 +69,15 @@ def results(provided_community_board):
 def index():
    return render_template('./index.html')
 
+@app.route('/door', methods=['GET'])
+def door_page():
+   return render_template('./door.html')
+
+@app.route('/doorlog', methods=['GET'])
+@require_auth_key
+def door_log(provided_community_board):
+    return jsonify(api_get_door_log(provided_community_board))
+
 @app.route('/manualentry', methods=['POST'])
 @require_auth_key
 def testing(provided_community_board):
