@@ -8,7 +8,7 @@ import urllib3
 SHELLY_CLOUD_SERVER = 'shelly-212-eu.shelly.cloud'  # not sensitive, hardcoded
 SHELLY_CLOUD_AUTH_KEY = os.environ.get('SHELLY_CLOUD_AUTH_KEY')
 SHELLY_DEVICE_ID = os.environ.get('SHELLY_DEVICE_ID')
-# Confirmed via physical test 2026-07-22: channel 1 drives the downstairs
+# Confirmed via physical test 2026-07-22: channel 1 drives the bottom
 # door relay (the only door this "door" command controls).
 SHELLY_DOOR_CHANNEL = 1
 
