@@ -24,14 +24,12 @@ for i in "${!NUMBERS[@]}"; do
   NUMBER="${NUMBERS[$i]}"
   VOTE="${VOTES[$((i % ${#VOTES[@]}))]}"
 
-  # Twilio webhook body: URL-encoded, then base64-encoded (as API Gateway delivers it to Lambda)
-  ENCODED_NUMBER=$(python3 -c "import urllib.parse; print(urllib.parse.quote('${NUMBER}'))")
-  FORM_BODY="Body=${VOTE}&From=${ENCODED_NUMBER}"
-  B64_BODY=$(echo -n "$FORM_BODY" | base64)
-
+  # Twilio posts an application/x-www-form-urlencoded body; apig-wsgi hands
+  # that straight to Flask as text, so just send a normal form POST.
   curl -s -o /dev/null -w "${NUMBER} (${VOTE}): %{http_code}\n" \
     -X POST "$URL" \
-    --data-raw "$B64_BODY" &
+    --data-urlencode "Body=${VOTE}" \
+    --data-urlencode "From=${NUMBER}" &
 done
 
 wait
