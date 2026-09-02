@@ -156,8 +156,11 @@ def parse_incoming_text(incoming_number,incoming_msg,community_board):
     voting_member:Voter = members[incoming_number] or None
 
     if shelly_door.is_door_command(incoming_msg):
-        if shelly_door.trigger_door():
-            return create_response_msg(shelly_door.DOOR_TRIGGERED_MESSAGE)
+        target = shelly_door.door_target(incoming_msg)
+        if target is None:
+            return create_response_msg(shelly_door.DOOR_UNKNOWN_MESSAGE)
+        if shelly_door.trigger_door(target):
+            return create_response_msg(shelly_door.triggered_message(target))
         else:
             return create_response_msg(shelly_door.DOOR_ERROR_MESSAGE)
 
@@ -208,6 +211,7 @@ def api_get_door_log(community_board):
         result.append({
             'name': voter.name if voter else 'Unknown',
             'timestamp': entry['timestamp'],
+            'door': entry.get('door', 'unknown'),
         })
     return result
 

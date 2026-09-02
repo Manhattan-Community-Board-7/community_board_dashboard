@@ -43,7 +43,14 @@ def get_door_log(community_board, days=30):
             timestamp, sms_number, message = parts[0], parts[1], parts[2]
             if not shelly_door.is_door_command(message):
                 continue
-            entries.append({'from': sms_number, 'timestamp': timestamp})
+            # Which door: 'bottom' / 'top', or 'unknown' for an invalid
+            # 'door ...' text. Bare 'door' predates the second device and
+            # door_target() maps it to 'bottom' (the only door back then).
+            entries.append({
+                'from': sms_number,
+                'timestamp': timestamp,
+                'door': shelly_door.door_target(message) or 'unknown',
+            })
     except Exception as e:
         print(f"Error listing door log: {str(e)}")
 

@@ -44,7 +44,10 @@ DURATION_UNIT_SECONDS = {'s': 1, 'm': 60, 'h': 3600, 'd': 86400, 'w': 604800}
 
 
 def is_door_command(body):
-    return body.strip().lower() == 'door'
+    # Mirrors app/shelly_door.is_door_command: 'door', 'bottom door',
+    # 'top door', or an invalid 'door ...' variant.
+    n = ' '.join(body.strip().lower().split())
+    return n == 'door' or n.startswith('door ') or n.endswith(' door')
 
 
 def parse_since(since):

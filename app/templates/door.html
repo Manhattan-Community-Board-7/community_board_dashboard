@@ -24,7 +24,7 @@
     <p id="status">Loading...</p>
     <table id="doorTable" style="display:none;">
         <thead>
-            <tr><th>Time</th><th>Name</th></tr>
+            <tr><th>Time</th><th>Name</th><th>Door</th></tr>
         </thead>
         <tbody id="doorTableBody"></tbody>
     </table>
@@ -85,8 +85,13 @@
                         timeCell.textContent = formatTimestamp(entry.timestamp);
                         const nameCell = document.createElement('td');
                         nameCell.textContent = entry.name;
+                        const doorCell = document.createElement('td');
+                        // 'bottom' / 'top' / 'unknown' -> 'Bottom' / 'Top' / 'Unknown'
+                        const door = entry.door || 'unknown';
+                        doorCell.textContent = door.charAt(0).toUpperCase() + door.slice(1);
                         row.appendChild(timeCell);
                         row.appendChild(nameCell);
+                        row.appendChild(doorCell);
                         tbody.appendChild(row);
                     });
                     statusEl.style.display = 'none';
