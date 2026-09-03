@@ -52,8 +52,9 @@ def _normalize(incoming_msg):
 
 def is_door_command(incoming_msg):
     """True for any door-unlock text: 'door', 'bottom door', 'top door', or an
-    invalid 'door' variant like 'door foo'. Used both to route incoming texts
-    and to filter the raw log down to door events (door_log.py)."""
+    invalid 'door' variant like 'door foo'. Routes incoming texts in
+    parse_incoming_text; door_scripts/backfill_door_log.py mirrors this logic
+    to pull historical door texts out of the raw vote log."""
     n = _normalize(incoming_msg)
     return n == 'door' or n.startswith('door ') or n.endswith(' door')
 

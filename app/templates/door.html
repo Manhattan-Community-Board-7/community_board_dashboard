@@ -24,7 +24,7 @@
     <p id="status">Loading...</p>
     <table id="doorTable" style="display:none;">
         <thead>
-            <tr><th>Time</th><th>Name</th><th>Door</th></tr>
+            <tr><th>Time</th><th>Name</th><th>Door</th><th>Result</th></tr>
         </thead>
         <tbody id="doorTableBody"></tbody>
     </table>
@@ -89,9 +89,15 @@
                         // 'bottom' / 'top' / 'unknown' -> 'Bottom' / 'Top' / 'Unknown'
                         const door = entry.door || 'unknown';
                         doorCell.textContent = door.charAt(0).toUpperCase() + door.slice(1);
+                        const resultCell = document.createElement('td');
+                        // triggered: true -> unlocked, false -> relay failed / unknown
+                        // command, null -> backfilled entry with no recorded outcome.
+                        resultCell.textContent = entry.triggered === true ? 'Opened'
+                            : entry.triggered === false ? 'Failed' : '—';
                         row.appendChild(timeCell);
                         row.appendChild(nameCell);
                         row.appendChild(doorCell);
+                        row.appendChild(resultCell);
                         tbody.appendChild(row);
                     });
                     statusEl.style.display = 'none';
