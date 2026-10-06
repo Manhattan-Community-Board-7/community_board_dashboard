@@ -500,8 +500,8 @@
                 candidatesList = candidatesRaw.split('\n')
                                             .map(name => name.trim())
                                             .filter(name => name !== "");
-                if (candidatesList.length < 2) {
-                    alert("For an ELECTION, please provide at least two candidates, each on a new line.");
+                if (candidatesList.length < 1) {
+                    alert("For an ELECTION, please provide at least one candidate, one per line.");
                     return;
                 }
             }
